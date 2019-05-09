@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 	"strings"
@@ -56,9 +55,9 @@ func main() {
 			currentIp = ip
 			d, r := getRecord(domain, sub)
 			modifyRecord(sub, ip, d, r)
-			fmt.Printf("set ip %s\n", ip)
+			log.Printf("set ip %s\n", ip)
 		}
-		fmt.Printf("current ip %s\n", ip)
+		log.Printf("current ip %s\n", ip)
 		time.Sleep(600 * time.Second)
 	}
 }
