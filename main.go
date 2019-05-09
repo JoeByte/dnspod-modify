@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 	"strings"
+	"regexp"
 	"net/url"
 	"net/http"
 	"io/ioutil"
@@ -50,7 +51,8 @@ func main() {
 
 	for {
 		ip := getIpAddr()
-		if currentIp != ip {
+		isIpAddr, _ := regexp.MatchString("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$", ip)
+		if isIpAddr && currentIp != ip {
 			currentIp = ip
 			d, r := getRecord(domain, sub)
 			modifyRecord(sub, ip, d, r)
