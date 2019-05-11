@@ -49,7 +49,12 @@ func main() {
 	)
 
 	for {
-		ip := getIpAddr()
+		ip, err := getIpAddr()
+		if err != nil {
+			log.Print(err)
+			time.Sleep(60 * time.Second)
+			continue
+		}
 		isIpAddr, _ := regexp.MatchString("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$", ip)
 		if isIpAddr && currentIp != ip {
 			currentIp = ip
@@ -134,11 +139,20 @@ func requestApi(uri string, method string, argv map[string]string) (interface{},
 // @see https://www.ipify.org/
 // @see https://seeip.org/
 // @see cip.cc
-func getIpAddr() string {
+func getIpAddr() (string, error) {
 	url := "https://api.ipify.org"
-	req, _ := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
 	client := &http.Client{Timeout: time.Second * 10,}
-	res, _ := client.Do(req)
-	body, _ := ioutil.ReadAll(res.Body)
-	return string(body)
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
 }
