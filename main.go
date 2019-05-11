@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"log"
 	"time"
 	"strings"
@@ -9,10 +10,9 @@ import (
 	"net/http"
 	"io/ioutil"
 	"encoding/json"
+	"github.com/joho/godotenv"
 )
 
-const dnsId = ""
-const dnsToken = ""
 const dnsEndpoint = "https://dnsapi.cn/"
 
 var currentIp = ""
@@ -43,9 +43,14 @@ type response struct {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	var (
-		domain = "xxtime.com"
-		sub    = "www"
+		domain = os.Getenv("DOMAIN")
+		sub    = os.Getenv("DOMAIN_SUB")
 	)
 
 	for {
@@ -55,6 +60,8 @@ func main() {
 			time.Sleep(60 * time.Second)
 			continue
 		}
+		log.Printf("current ip %s\n", ip)
+
 		isIpAddr, _ := regexp.MatchString("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$", ip)
 		if isIpAddr && currentIp != ip {
 			currentIp = ip
@@ -62,7 +69,6 @@ func main() {
 			modifyRecord(sub, ip, d, r)
 			log.Printf("set ip %s\n", ip)
 		}
-		log.Printf("current ip %s\n", ip)
 		time.Sleep(600 * time.Second)
 	}
 }
@@ -98,6 +104,8 @@ func getRecord(domain string, sub string) (domain, record) {
 }
 
 func requestApi(uri string, method string, argv map[string]string) (interface{}, error) {
+	dnsId := os.Getenv("DNS_ID")
+	dnsToken := os.Getenv("DNS_TOKEN")
 	var (
 		c        = &http.Client{Timeout: time.Second * 10,}
 		httpAddr = dnsEndpoint + uri
